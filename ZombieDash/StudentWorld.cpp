@@ -1,6 +1,8 @@
 #include "StudentWorld.h"
 #include "GameConstants.h"
 #include "Level.h"
+#include "Actor.h"
+#include <sstream>
 #include <list>
 #include <string>
 using namespace std;
@@ -77,7 +79,12 @@ void StudentWorld::cleanUp()
 void StudentWorld::loadLevel()
 {
     Level lev(assetPath());
-    string levelFile = "level01.txt";
+    
+    // how to choose which level to load
+    ostringstream oss;
+    oss << getLevel();  // since this returns int easier to use ostringstream
+    string levelFile = "level0" + oss.str() + ".txt";
+    
     Level::LoadResult result = lev.loadLevel(levelFile);
     if (result == Level::load_fail_file_not_found)
         cerr << "Cannot find level01.txt data file" << endl;
@@ -113,7 +120,7 @@ void StudentWorld::loadLevel()
 // see if two objects overlap in map
 bool StudentWorld::overlaps(int x, int y, int dist)
 {
-    // iterate thru all other actors and check if they intersect -> if they do then return true
+    // iterate thru all other actors and check if they overlap -> if they do then return true
     
     int deltaX, deltaY;
     
