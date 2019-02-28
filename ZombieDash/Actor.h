@@ -17,18 +17,24 @@ public:
     virtual void doSomething() = 0;     // pure virtual func since will never instantiate an Actor
 
     
-    virtual StudentWorld* getWorld();
+    virtual StudentWorld* getWorld() const;
     
     // check if item overlaps w/ another given the actor's location
 //    bool overlaps(int x, int y, Actor& a);
     
     
     bool isAlive() const;
+    void makeDead();
 
     bool isFlammable() const;
     bool isInfectable() const;
     bool blocksMovement() const;
     bool blocksFlame() const;
+    
+    // check if object can exit the level -> false for EVERYTHING except for Citizen and Penelope
+    virtual bool canExit() const;
+    
+    virtual void burnUp();
     
 private:
     StudentWorld* m_myWorld;
@@ -94,6 +100,8 @@ public:
     Flame(double startX, double startY, StudentWorld* world);
     virtual ~Flame();
     virtual void doSomething();
+private:
+    int m_lifeTicks;
 };
 
 class Vomit : public ActivatingObject
@@ -110,6 +118,8 @@ public:
     Landmine(double startX, double startY, StudentWorld* world);
     virtual ~Landmine();
     virtual void doSomething();
+    
+    virtual void burnUp();
 };
 
 class Goodie : public ActivatingObject
@@ -165,6 +175,8 @@ public:
     virtual ~Agent();
     
     bool isBlocked(int destX, int destY);
+//    bool overlaps(int x, int y);
+    
     // since will never instantiate an Agent -> Abstract Base Class
     virtual void doSomething() = 0;
 };
@@ -180,6 +192,9 @@ public:
     
     int getMovePlanDist() const;
     void setMovePlanDist(int i);
+    
+    virtual void burnUp();
+
 private:
     // since will never instantiate a Zombie -> Abstract Base Class
     virtual void specificZombieStuff() = 0;
@@ -221,6 +236,7 @@ public:
     
     int getInfectionCount() const;
     void incInfectionCount();       // increment infectionCount by 1
+    
 private:
     bool m_infectionStatus;
     int m_infectionCount;
@@ -235,10 +251,11 @@ public:
     Citizen(double startX, double startY, StudentWorld* world);
     virtual ~Citizen();
     virtual void doSomething();
+    
+    virtual bool canExit() const;
+    
+    virtual void burnUp();
 };
-
-
-
 
 // Penelope Class
 class Penelope: public Human
@@ -248,10 +265,23 @@ public:
     virtual ~Penelope();
     virtual void doSomething();
     
+    int getNumVaccines() const;
+    int getNumFlames() const;
+    int getNumMines() const;
+    
+    void incNumVaccines(int n);
+    void incNumFlames(int n);
+    void incNumMines(int n);
+    
+    virtual void burnUp();
+
+    
+//    virtual bool canExit() const;
+    
 private:
-    int m_numMines;
-    int m_numFlames;
     int m_numVac;
+    int m_numFlames;
+    int m_numMines;
 };
 
 

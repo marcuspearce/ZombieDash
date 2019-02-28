@@ -12,6 +12,14 @@ bool GameWorld::getKey(int& value)
     {
         if (value == 'q'  ||  value == '\x03')  // CTRL-C
             m_controller->quitGame();
+        
+        // NEW STUFF TO MAKE IT EASIER
+        if (value == 'n')
+        {
+            advanceToNextLevel();
+            cleanUp();
+            init();
+        }        
     }
     return gotKey;
 }

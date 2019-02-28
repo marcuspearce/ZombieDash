@@ -15,7 +15,7 @@ Actor::~Actor()
 {}
 
 // need way to access StudentWorld
-StudentWorld* Actor::getWorld()
+StudentWorld* Actor::getWorld() const
 {
     return m_myWorld;
 }
@@ -26,6 +26,10 @@ StudentWorld* Actor::getWorld()
 bool Actor::isAlive() const
 {
     return m_isAlive;
+}
+void Actor::makeDead()
+{
+    m_isAlive = false;
 }
 bool Actor::isFlammable() const
 {
@@ -43,6 +47,20 @@ bool Actor::blocksFlame() const
 {
     return m_blocksFlame;
 }
+
+// most exits cannot exit (ones that can will overwrite this method)
+bool Actor::canExit() const
+{
+    return false;
+}
+// this will ONLY BE CALLED ON FLAMMABLE OBJECTS. Some objects will expand on this behaviour
+void Actor::burnUp()
+{
+    makeDead();
+}
+
+
+
 
 
 // WALL member function implementations
@@ -87,7 +105,13 @@ Exit::~Exit()
 {}
 void Exit::doSomething()
 {
-    // TODO: IMPLEMENT LATER
+    // TODO: FINISH CITIZEN PORTION OF INCORPORATING EXIT
+    
+    // check overlap w/ Citizen and do resulting stuff
+    
+    // if overlaps w/ Penelope and can exit, inform level Penelope has completed currnet level
+    if(getWorld()->penelopeCanExit(getX(), getY()))
+        getWorld()->toggleTimeToAdvance();
 }
 
 
@@ -109,13 +133,26 @@ void Pit::doSomething()
 
 // every Flame depth of 0, !flammable, !blocksFlames
 Flame::Flame(double startX, double startY, StudentWorld* world)
-: ActivatingObject(IID_FLAME, startX, startY, 0, false, false, world)
+: ActivatingObject(IID_FLAME, startX, startY, 0, false, false, world), m_lifeTicks(0)
 {}
 Flame::~Flame()
 {}
 void Flame::doSomething()
-{
-    // TODO: IMPLEMENT LATER
+{    
+    // check to see if currently alive, if not return immediately
+    if(!isAlive())
+        return;
+    
+    // after 2 ticks from creation must set own state to dead - return. if not inc lifeTicks by 1
+    if(m_lifeTicks >= 2)
+    {
+        makeDead();
+        return;
+    }
+    m_lifeTicks++;
+    
+    // damage all damagable objects that overlap w/ flame 
+    getWorld()->burnOverlappingItems(getX(), getY());
 }
 
 
@@ -145,6 +182,27 @@ void Landmine::doSomething()
 {
     // TODO: IMPLEMENT LATER
 }
+void Landmine::burnUp()
+{
+    // set state to dead
+    Actor::burnUp();
+    // play sound effect that landmine exploded
+    getWorld()->playSound(SOUND_LANDMINE_EXPLODE);
+    // introduce flame object same location as Landmine
+    getWorld()->addFlame(getX(),getY());
+    // introduce flame objects around Landmine
+    getWorld()->addFlame(getX(),getY()+SPRITE_HEIGHT);                      // north
+    getWorld()->addFlame(getX()-SPRITE_WIDTH,getY()+SPRITE_HEIGHT);         // northeast
+    getWorld()->addFlame(getX()-SPRITE_WIDTH,getY());                       // east
+    getWorld()->addFlame(getX()-SPRITE_WIDTH,getY()-SPRITE_HEIGHT);         // southeast
+    getWorld()->addFlame(getX(),getY()-SPRITE_HEIGHT);                      // south
+    getWorld()->addFlame(getX()+SPRITE_WIDTH,getY()-SPRITE_HEIGHT);         // southwest
+    getWorld()->addFlame(getX()+SPRITE_WIDTH,getY());                       // west
+    getWorld()->addFlame(getX()+SPRITE_WIDTH,getY()+SPRITE_HEIGHT);         // northwest
+    // introduce Pit at same location as Landmine
+    getWorld()->addActor(new Pit(getX(),getY(),getWorld()));
+}
+
 
 
 // GOODIE IMPLEMENTATION
@@ -156,12 +214,23 @@ Goodie::Goodie(int imageID, double startX, double startY, StudentWorld* world)
 Goodie::~Goodie()
 {}
 void Goodie::doSomething()
-{
-    // TODO: IMPLEMENT LATER
+{    
+    // must check to see if currently alive - if not then return immediately
+    if(!isAlive())
+        return;
     
-    // doCommonThingA
-    // doDifferentiatedStuff
-    // doCommonThingB
+    // determine if overlaps w/ Penelope. if so...
+    if(getWorld()->overlapsWithPenelope(getX(), getY()))
+    {
+        // +50 pts
+        getWorld()->increaseScore(50);
+        // set its state to dead
+        makeDead();
+        // play sound effect to indicate Penelope picked up a Goodie
+        getWorld()->playSound(SOUND_GOT_GOODIE);
+        // increment respective inventory depending on Goodie
+        specificGoodieStuff();
+    }
 }
 
 
@@ -175,7 +244,7 @@ VaccineGoodie::~VaccineGoodie()
 {}
 void VaccineGoodie::specificGoodieStuff()
 {
-    // TODO: IMPLEMENT LATER
+    getWorld()->getPenelope()->incNumVaccines(1);
 }
 
 
@@ -189,7 +258,7 @@ GasCanGoodie::~GasCanGoodie()
 {}
 void GasCanGoodie::specificGoodieStuff()
 {
-    // TODO: IMPLEMENT LATER
+    getWorld()->getPenelope()->incNumFlames(5);
 }
 
 
@@ -203,7 +272,7 @@ LandmineGoodie::~LandmineGoodie()
 {}
 void LandmineGoodie::specificGoodieStuff()
 {
-    // TODO: IMPLEMENT LATER
+    getWorld()->getPenelope()->incNumMines(2);
 }
 
 
@@ -223,6 +292,11 @@ bool Agent::isBlocked(int destX, int destY)
 {
     return getWorld()->isBlocked(destX, destY);
 }
+//bool Agent::overlaps(int x, int y)
+//{
+//    return getWorld()->overlaps(x,y);
+//}
+
 
 
 // ZOMBIE IMPLEMENTATION
@@ -249,6 +323,17 @@ void Zombie::setMovePlanDist(int i)
 {
     m_movePlanDist = i;
 }
+
+void Zombie::burnUp()
+{
+    // set own state to dead
+    Actor::burnUp();
+    // play sound effect
+    getWorld()->playSound(SOUND_ZOMBIE_DIE);
+    
+    // TODO: FINISH IMPLEMENTING
+}
+
 
 
 // DUMBZOMBIE IMPLEMENTATION
@@ -306,14 +391,6 @@ void Human::incInfectionCount()
 
 // CITIZEN IMPLEMENTATION
 
-//class Citizen : public Human
-//{
-//public:
-//    Citizen(double startX, double startY, StudentWorld* world);
-//    virtual ~Citizen();
-//    virtual void doSomething();
-//}
-
 // every citizen has correct image
 Citizen::Citizen(double startX, double startY, StudentWorld* world)
 : Human(IID_CITIZEN, startX, startY, world)
@@ -324,6 +401,19 @@ void Citizen::doSomething()
 {
     // TODO: IMPLEMENT LATER
 }
+bool Citizen::canExit() const
+{
+    return true;        // citizens can always exit 
+}
+void Citizen::burnUp()
+{
+    // set own state to dead
+    Actor::burnUp();
+    // play sound effect
+    getWorld()->playSound(SOUND_CITIZEN_DIE);
+    // decrease player score -1000 pts
+    getWorld()->increaseScore(-1000);
+}
 
 
 
@@ -331,7 +421,7 @@ void Citizen::doSomething()
 
 
 Penelope::Penelope(double startX, double startY, StudentWorld* world)
-: Human(IID_PLAYER, startX, startY, world), m_numMines(0), m_numFlames(0), m_numVac(0)
+: Human(IID_PLAYER, startX, startY, world), m_numFlames(0), m_numVac(0), m_numMines(0)
 {}
 Penelope::~Penelope()
 {}
@@ -340,9 +430,12 @@ void Penelope::doSomething()
     // TODO: FINISH IMPLEMENTING 
     
     
-    
+    // must check to see if currently alive - if not then return immediately
     if(!isAlive())
         return;
+    
+    // TODO: CITIZEN INFECTED SHIT
+    
     
     int key;
     if(getWorld()->getKey(key))
@@ -350,6 +443,18 @@ void Penelope::doSomething()
         // must move 4 pixels in given direction (pg 28)
         switch(key)
         {
+            case KEY_PRESS_SPACE:
+                // if at least one flame charge in inventory
+                if(getNumFlames() > 0)
+                {
+                    // decrease number flames by 1
+                    incNumFlames(-1);
+                    // play sound effect
+                    getWorld()->playSound(SOUND_PLAYER_FIRE);
+                    // shoot flamethrower (add up to three new objects to the game)
+                    getWorld()->flamethrower(getX(), getY());
+                }
+                break;
             case KEY_PRESS_LEFT:
                 setDirection(left);
                 if(!isBlocked(getX()-4, getY()))
@@ -373,6 +478,47 @@ void Penelope::doSomething()
         }
     }
 }
+
+int Penelope::getNumVaccines() const
+{
+    return m_numVac;
+}
+int Penelope::getNumFlames() const
+{
+    return m_numFlames;
+}
+int Penelope::getNumMines() const
+{
+    return m_numMines;
+}
+
+void Penelope::incNumVaccines(int n)
+{
+    m_numVac += n;
+}
+void Penelope::incNumFlames(int n)
+{
+    m_numFlames += n;
+}
+void Penelope::incNumMines(int n)
+{
+    m_numMines += n;
+}
+void Penelope::burnUp()
+{
+    // set own state to dead
+    Actor::burnUp();
+    // play sound effect
+    getWorld()->playSound(SOUND_PLAYER_DIE);
+    // StudentWorld object should detect Penelope death and current level ends
+}
+
+//// Penelope can only exit when there are no more citizens in the world
+//bool Penelope::canExit() const
+//{
+//    // if no citizens then true Penelope can exit, otherwise false
+//    return !(getWorld()->worldContainsCitizens());
+//}
 
 
 
