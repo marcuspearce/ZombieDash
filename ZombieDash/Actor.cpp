@@ -6,64 +6,61 @@
 // Students:  Add code to this file, Actor.h, StudentWorld.h, and StudentWorld.cpp
 
 
-// ACTOR member funciton implementations
+// ACTOR IMPLEMENTATION
 
-// since all Actor subclasses start w/ direction right, size 1.0 and alive
+// since all Actor subclasses start w/ direction right (EXCEPTION FLAME BUT DEALT WITH LATER), size 1.0 and alive
 Actor::Actor(int imageID, double startX, double startY, int depth, bool flammable, bool infectable, bool blockMove, bool blockFlame, StudentWorld* world)
 : GraphObject(imageID, startX, startY, right, depth, 1.0), m_myWorld(world), m_isAlive(true), m_flammable(flammable), m_infectable(infectable), m_blocksMovement(blockMove), m_blocksFlame(blockFlame), m_infectionStatus(false)
 {}
 Actor::~Actor()
 {}
 
-// need way to access StudentWorld
-StudentWorld* Actor::getWorld() const
+// accessor function for StudentWorld Actor is currently in. I chose to define getWorld() as non-virtual since it is the same for every Actor, and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_myWorld
+StudentWorld*Actor::getWorld() const
 {
     return m_myWorld;
 }
-//bool Actor::overlaps(int x, int y, Actor&a)
-//{
-//    return getWorld()->overlaps(x,y,a);
-//}
+// accessor function for if Actor is currently alive. I chose to define isAlive() as non-virtual since it is the same for every Actor, and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_isAlive) (e.g. in List<Actor*> m_actors)
 bool Actor::isAlive() const
 {
     return m_isAlive;
 }
+// makes the Actor dead. I chose to define makeDead() as non-virtual since it is the same for every Actor, and defined it in the Actor class since almost every subclass of Actor needs this method
 void Actor::makeDead()
 {
     m_isAlive = false;
 }
+// accessor function for if Actor is flammable. I chose to define isFlammable() as non-virtual since it is the same for every Actor (each Actor subclass will define this in its constructor), and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_isFlammable) (e.g. in List<Actor*> m_actors)
 bool Actor::isFlammable() const
 {
     return m_flammable;
 }
+// accessor function for if Actor is infectable. I chose to define isInfectable() as non-virtual since it is the same for every Actor (each Actor subclass will define this in its constructor), and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_isInfectable) (e.g. in List<Actor*> m_actors)
 bool Actor::isInfectable() const
 {
     return m_infectable;
 }
+// accessor function for if Actor blocks movement. I chose to define blocksMovement() as non-virtual since it is the same for every Actor (each Actor subclass will define this in its constructor), and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_blocksMovement) (e.g. in List<Actor*> m_actors)
 bool Actor::blocksMovement() const
 {
     return m_blocksMovement;
 }
+// accessor function for if Actor blocks flame. I chose to define blocksflame() as non-virtual since it is the same for every Actor (each Actor subclass will define this in its constructor), and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_blocksFlame) (e.g. in List<Actor*> m_actors)
 bool Actor::blocksFlame() const
 {
     return m_blocksFlame;
 }
-
-// most exits cannot exit (ones that can will overwrite this method)
-bool Actor::canExit() const
-{
-    return false;
-}
-// this will ONLY BE CALLED ON FLAMMABLE OBJECTS. Some objects will expand on this behaviour
+// Actor will do specified behaviour when comes into contact w/ fire (only called on FLAMMABLE objects). I chose to define burnUp() as virtual as some subclasses of Actor will do different things when they burnUp. I put it in the Actor class because it is called when iterating through m_actors.
 void Actor::burnUp()
 {
     makeDead();
 }
-
+// Accessor function for m_infectionStatus. I chose to define getInfectionStatus as non-virtual since it is the same for every Actor, and defined in the Actor class cuz called when iterating through m_actors.
 bool Actor::getInfectionStatus() const
 {
     return m_infectionStatus;
 }
+// Mutator function for m_infectionStatus. I chose to define setInfectionStatus as non-virtual since it is the same for every Actor, and defined in the Actor class cuz called when iterating through m_actors.
 void Actor::setInfectionStatus(bool b)
 {
     m_infectionStatus = b;
@@ -71,9 +68,7 @@ void Actor::setInfectionStatus(bool b)
 
 
 
-
-
-// WALL member function implementations
+// WALL IMPLEMENTATION
 
 // Walls have depth 0, !flammable, !infectable, blocksMovement, blocksFlame
 Wall::Wall(double startX, double startY, StudentWorld* world)
@@ -81,7 +76,7 @@ Wall::Wall(double startX, double startY, StudentWorld* world)
 {}
 Wall::~Wall()
 {}
-// do nothing, I'm just a wall!
+// Wall must doSomething() every tick of the game (i.e. nothing). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Wall class' specific behaviour.
 void Wall::doSomething()
 {}
 
@@ -95,10 +90,12 @@ ActivatingObject::ActivatingObject(int imageID, double startX, double startY, in
 {}
 ActivatingObject::~ActivatingObject()
 {}
+// accessor function for m_active. I chose to define isActive() as non-virtual since it is the same for every ActivatingObject, and defined in the ActivatingObject class cuz only ActivatingObjects need it.
 bool ActivatingObject::isActive() const
 {
     return m_active;
 }
+// mutator function for m_active. I chose to define setActive() as non-virtual since it is the same for every ActivatingObject, and defined in the ActivatingObject class cuz only ActivatingObjects need it.
 void ActivatingObject::setActive(bool b)
 {
     m_active = b;
@@ -113,6 +110,7 @@ Exit::Exit(double startX, double startY, StudentWorld* world)
 {}
 Exit::~Exit()
 {}
+// Exit must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Exit class' specific behaviour.
 void Exit::doSomething()
 {
     // determine if exit overlaps w/ a citizen. if so...
@@ -138,6 +136,7 @@ Pit::Pit(double startX, double startY, StudentWorld* world)
 {}
 Pit::~Pit()
 {}
+// Pit must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Pit class' specific behaviour.
 void Pit::doSomething()
 {
     getWorld()->pitExecuteLogic(getX(),getY());
@@ -152,6 +151,7 @@ Flame::Flame(double startX, double startY, StudentWorld* world)
 {}
 Flame::~Flame()
 {}
+// Flame must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Flame class' specific behaviour.
 void Flame::doSomething()
 {    
     // check to see if currently alive, if not return immediately
@@ -179,6 +179,7 @@ Vomit::Vomit(double startX, double startY, StudentWorld* world)
 {}
 Vomit::~Vomit()
 {}
+// Vomit must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Vomit class' specific behaviour.
 void Vomit::doSomething()
 {
     // check to see if currently alive, if not return immediately
@@ -206,6 +207,7 @@ Landmine::Landmine(double startX, double startY, StudentWorld* world)
 {}
 Landmine::~Landmine()
 {}
+// Landmine must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Landmine class' specific behaviour.
 void Landmine::doSomething()
 {
     // check if currently alive - if not return immediately
@@ -226,15 +228,13 @@ void Landmine::doSomething()
     // determine if overlaps w/ flammable object (SINCE ACTIVATING OBJECTS WHICH ARE FLAMMABLE DON'T MOVE)
     if(getWorld()->checkOverlapExplodable(getX(), getY(), this))
     {
-        std::cerr<<"madeit"<<std::endl;
-        
-        
         // set state to dead
         makeDead();
         explode();
     }
     
 }
+// when overlaps w/ flame Landmine will explode (full details in spec). This is virtual because it is redefining the virtual func in superclass Actor, specifying what a Landmine specifically will do when overlaps w/ Flame
 void Landmine::burnUp()
 {
     // set state to dead
@@ -272,6 +272,7 @@ Goodie::Goodie(int imageID, double startX, double startY, StudentWorld* world)
 {}
 Goodie::~Goodie()
 {}
+// Goodie must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Goodie class' specific behaviour. Note: each subclass of Goodie will redefine Goodie's PRIVATE function specificGoodieStuff() which is called within Goodie's doSomething(), thus subclasses of Goodie don't redefine doSomething()
 void Goodie::doSomething()
 {    
     // must check to see if currently alive - if not then return immediately
@@ -342,19 +343,22 @@ void LandmineGoodie::specificGoodieStuff()
 
 // All Agents have depth of 0, flammable, blocksMovement, !blocksFlames
 Agent::Agent(int imageID, double startX, double startY, bool infectable, StudentWorld* world)
-: Actor(imageID, startX, startY, 0, true, infectable, true, false, world)
+: Actor(imageID, startX, startY, 0, true, infectable, true, false, world), m_paralysisTick(0)
 {}
 Agent::~Agent()
 {}
 // using box around object see if is blocked from moving in given direction
+// checks if Agent is blocked from moving to given position (using method in StudentWorld). I chose to define isBlocked() as non-virtual since it is the same for every Agent, and defined it in the Agent class since only moving Actors (i.e. Agents) will check if they are blocked from moving to a given position
 bool Agent::isBlocked(int destX, int destY, Actor* a)
 {
     return getWorld()->isBlocked(destX, destY, a);
 }
+// mutator function for m_paralysisTick. I chose to define incParalysisTick() as non-virtual since it is the same for every Agent, and defined in the Agent class cuz only some subclasses of Agent need it.
 void Agent::incParalysisTick()
 {
     m_paralysisTick++;
 }
+// accessor function for if paralyzed (i.e. m_paralysisTick % 2 == 0). I chose to define isParalyzed() as non-virtual since it is the same for every Agent, and defined in the Agent class cuz only some subclasses of Agent need it.
 bool Agent::isParalyzed()
 {
     // if even paralysis tick then shouldn't do anything
@@ -371,6 +375,7 @@ Zombie::Zombie(double startX, double startY, StudentWorld* world)
 {}
 Zombie::~Zombie()
 {}
+// Zombie must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Zombie class' specific behaviour. Note: each subclass of Zombie will redefine Zombie's PRIVATE function specificZombieStuff() which is called within Zombie's doSomething(), thus subclasses of Zombie don't redefine doSomething(). This function is factored out this way because the majority of what subclasses of Zombie do in doSomething() is very similar.
 void Zombie::doSomething()
 {
     // check if currently alive - if not then return immediately
@@ -436,15 +441,17 @@ void Zombie::doSomething()
     else
         setMovePlanDist(0);
 }
+// accessor function for m_movePlanDist. I chose to define getMovePlanDist() as non-virtual since it is the same for every Zombie, and defined in the Zombie class cuz only subclasses of Zombie need it.
 int Zombie::getMovePlanDist() const
 {
     return m_movePlanDist;
 }
+// mutator function for m_movePlanDist. I chose to define setMovePlanDist() as non-virtual since it is the same for every Zombie, and defined in the Zombie class cuz only subclasses of Zombie need it.
 void Zombie::setMovePlanDist(int i)
 {
     m_movePlanDist = i;
 }
-
+// when overlaps w/ Zombie will execute certain behaviour (full details in spec). This is virtual because it is redefining the virtual func in superclass Actor, specifying what a Zombie specifically will do when overlaps w/ Flame. Note: each subclass of Zombie will redefine Zombie's PRIVATE function specificZombieDie() which is called within Zombie's burnUp(), thus subclasses of Zombie don't redefine burnUp(). This function is factored out this way because the majority of what subclasses of Zombie do in burnUp() is very similar.  
 void Zombie::burnUp()
 {
     // set own state to dead
@@ -515,7 +522,6 @@ int DumbZombie::specificZombieDie()
         }
         if(!(getWorld()->overlapsWithAnything(destX,destY)))
         {
-            std::cerr<<"madeit2 "<<destX<<","<<destY<<"   "<<getX()<<","<<getY()<<std::endl;
             getWorld()->addActor(new VaccineGoodie(destX,destY,getWorld()));
         }
     }
@@ -555,10 +561,12 @@ Human::Human(int imageID, double startX, double startY, StudentWorld* world)
 {}
 Human::~Human()
 {}
+// accessor function for m_infectionCount. I chose to define getInfectionCount() as non-virtual since it is the same for every Human, and defined in the Human class cuz only subclasses of Human need it.
 int Human::getInfectionCount() const
 {
     return m_infectionCount;
 }
+// mutator function for m_infectionCount. I chose to define setInfectionCount() as non-virtual since it is the same for every Human, and defined in the Human class cuz only subclasses of Human need it.
 void Human::setInfectionCount(int i)
 {
     m_infectionCount = i;
@@ -573,6 +581,7 @@ Citizen::Citizen(double startX, double startY, StudentWorld* world)
 {}
 Citizen::~Citizen()
 {}
+// Citizen must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Citizen class' specific behaviour.
 void Citizen::doSomething()
 {
     // check to see if still alive - if not return immediately
@@ -852,11 +861,7 @@ void Citizen::doSomething()
     
 }
 
-
-bool Citizen::canExit() const
-{
-    return true;        // citizens can always exit 
-}
+// when overlaps w/ flame Citizen will explode (full details in spec). This is virtual because it is redefining the virtual func in superclass Actor, specifying what a Citizen specifically will do when overlaps w/ Flame
 void Citizen::burnUp()
 {
     // set own state to dead
@@ -873,7 +878,7 @@ void Citizen::burnUp()
 
 
 Penelope::Penelope(double startX, double startY, StudentWorld* world)
-: Human(IID_PLAYER, startX, startY, world), m_numFlames(100), m_numVac(100), m_numMines(100)        //TODO: CHANGE BACK LATER
+: Human(IID_PLAYER, startX, startY, world), m_numFlames(0), m_numVac(0), m_numMines(0)       
 {}
 Penelope::~Penelope()
 {}

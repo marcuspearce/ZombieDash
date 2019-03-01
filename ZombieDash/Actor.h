@@ -7,21 +7,16 @@ class StudentWorld;
 // Students:  Add code to this file, Actor.cpp, StudentWorld.h, and StudentWorld.cpp
 
 
-// Actor Class - Abstract Base Class
-// every class has to doSomething and be able to access the StudentWorld it is in
+// Actor Class - all other classes derived from this -> ABSTRACT BASE CLASS
 class Actor: public GraphObject
 {
 public:
     Actor(int imageID, double startX, double startY, int depth, bool flammable, bool infectable, bool blockMove, bool blockFlame, StudentWorld* world);
     virtual ~Actor();
-    virtual void doSomething() = 0;     // pure virtual func since will never instantiate an Actor
+    // Each Actor in the StudentWorld must doSomething() every tick of the game. I chose to define a pure virtual function of doSomething() in my base Actor class because all subclasses of Actor need to doSomething(), and each Actor doSomething() in a different way. 
+    virtual void doSomething() = 0;     
 
-    
-    virtual StudentWorld* getWorld() const;
-    
-    // check if item overlaps w/ another given the actor's location
-//    bool overlaps(int x, int y, Actor& a);
-    
+    StudentWorld* getWorld() const;
     
     bool isAlive() const;
     void makeDead();
@@ -31,15 +26,12 @@ public:
     bool blocksMovement() const;
     bool blocksFlame() const;
     
-    // check if object can exit the level -> false for EVERYTHING except for Citizen and Penelope
-    virtual bool canExit() const;
-    
+    // burnUp() will only be called on FLAMMABLE objects - some classes may expand on this behaviour
     virtual void burnUp();
     
     void setInfectionStatus(bool b);
     bool getInfectionStatus() const;
 
-    
 private:
     StudentWorld* m_myWorld;
     bool m_isAlive;
@@ -51,8 +43,8 @@ private:
     bool m_infectionStatus;
 };
 
+
 // Wall Class
-// walls do not do anything in doSomething
 class Wall: public Actor
 {
 public:
@@ -62,18 +54,12 @@ public:
 };
 
 
-
-
-//      =============== NEW STUFF ===============
-
-
-
+// ActivatingObject Class -> ABSTRACT BASE CLASS
 class ActivatingObject : public Actor
 {
 public:
     ActivatingObject(int imageID, double startX, double startY, int depth, bool flammable, bool blockFlame,  StudentWorld* world);
     virtual ~ActivatingObject();
-    // ActivatingObject never going to be instantiated -> Abstract Base Class
     virtual void doSomething() = 0;
     
     // accessor and mutator for isActive
@@ -83,6 +69,8 @@ private:
     bool m_active;
 };
 
+
+// Exit Class
 class Exit : public ActivatingObject
 {
 public:
@@ -91,6 +79,8 @@ public:
     virtual void doSomething();
 };
 
+
+// Pit Class
 class Pit : public ActivatingObject
 {
 public:
@@ -99,6 +89,8 @@ public:
     virtual void doSomething();
 };
 
+
+// Flame Class
 class Flame : public ActivatingObject
 {
 public:
@@ -109,6 +101,8 @@ private:
     int m_lifeTicks;
 };
 
+
+// Vomit Class
 class Vomit : public ActivatingObject
 {
 public:
@@ -119,6 +113,8 @@ private:
     int m_lifeTicks;
 };
 
+
+// Landmine Class
 class Landmine : public ActivatingObject
 {
 public:
@@ -127,12 +123,13 @@ public:
     virtual void doSomething();
     
     virtual void burnUp();
-    
 private:
     void explode();
     int m_safetyTicks;
 };
 
+
+// Goodie Class -> ABSTRACT BASE CLASS
 class Goodie : public ActivatingObject
 {
 public:
@@ -140,10 +137,12 @@ public:
     virtual ~Goodie();
     virtual void doSomething();
 private:
-    // since will never instantiate a Goodie -> Abstract Base Class (each Goodie implements their own
     virtual void specificGoodieStuff() = 0;
 };
 
+
+
+// VaccineGoodie Class
 class VaccineGoodie : public Goodie
 {
 public:
@@ -154,6 +153,8 @@ private:
     virtual void specificGoodieStuff();
 };
 
+
+// GasCanGoodie Class
 class GasCanGoodie : public Goodie
 {
 public:
@@ -164,6 +165,8 @@ private:
     virtual void specificGoodieStuff();
 };
 
+
+// LandmineGoodie Class
 class LandmineGoodie : public Goodie
 {
 public:
@@ -175,21 +178,15 @@ private:
 };
 
 
-
-
-
-// Agent Class - for objects that move around the map either thru user input or algorithm
+// Agent Class -> ABSTRACT BASE CLASS
 class Agent: public Actor
 {
 public:
     Agent(int imageID, double startX, double startY, bool infectable, StudentWorld* world);
     virtual ~Agent();
+    virtual void doSomething() = 0;
     
     bool isBlocked(int destX, int destY, Actor* a);
-//    bool overlaps(int x, int y);
-    
-    // since will never instantiate an Agent -> Abstract Base Class
-    virtual void doSomething() = 0;
     
     void incParalysisTick();
     bool isParalyzed();
@@ -197,7 +194,8 @@ private:
     int m_paralysisTick;
 };
 
-// Zombie Class
+
+// Zombie Class - ABSTRACT BASE CLASS
 class Zombie : public Agent
 {
 public:
@@ -218,6 +216,7 @@ private:
     int m_movePlanDist;        // movement plan distance
 };
 
+
 // Dumb Zombie Class
 class DumbZombie : public Zombie
 {
@@ -228,6 +227,7 @@ private:
     virtual void specificZombieStuff();
     virtual int specificZombieDie();
 };
+
 
 // Smart Zombie Class
 class SmartZombie : public Zombie
@@ -241,13 +241,12 @@ private:
 };
 
 
-// Human Class
+// Human Class - ABSTRACT BASE CLASS
 class Human : public Agent
 {
 public:
     Human(int imageID, double startX, double startY, StudentWorld* world);
     virtual ~Human();
-    //since will never instantiate a Human -> Abstract Base Class
     virtual void doSomething() = 0;
         
     int getInfectionCount() const;
@@ -258,7 +257,6 @@ private:
 };
 
 
-
 // Citizen Class
 class Citizen : public Human
 {
@@ -267,10 +265,9 @@ public:
     virtual ~Citizen();
     virtual void doSomething();
     
-    virtual bool canExit() const;
-    
     virtual void burnUp();
 };
+
 
 // Penelope Class
 class Penelope: public Human
@@ -289,10 +286,6 @@ public:
     void incNumMines(int n);
     
     virtual void burnUp();
-
-    
-//    virtual bool canExit() const;
-    
 private:
     int m_numVac;
     int m_numFlames;

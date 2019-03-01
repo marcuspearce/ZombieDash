@@ -18,19 +18,11 @@ public:
     virtual int move();
     virtual void cleanUp();
     
-    
     Penelope* getPenelope();
-    
     void addActor(Actor* a);
     
-    
-    
-    
     bool isBlocked(int x, int y, Actor* a);
-//    bool overlaps(int x, int y);
     bool overlaps(int x1, int y1, int x2, int y2);
-    
-//    bool overlapsWithPenelope(int x, int y);
     
     // below for Exit logic
     bool exitOverlapsWithCitizen(int x, int y);
@@ -70,9 +62,7 @@ private:
     
     // helper function for penelopeCanExit() func
     bool worldContainsCitizens();       // used to determine if Penelope can exit
-    
     bool m_timeToAdvance;
-
 };
 
 #endif // STUDENTWORLD_H_

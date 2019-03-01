@@ -27,7 +27,6 @@ StudentWorld::~StudentWorld()
 }
 
 
-
 // Allocates and inserts all Actors into GameWorld as specified in current level's data file
 int StudentWorld::init()
 {
@@ -41,7 +40,7 @@ int StudentWorld::init()
     
     // error checking
     Level::LoadResult result = lev.loadLevel(levelFile);
-    if (result == Level::load_fail_file_not_found)
+    if (getLevel() > 99 || result == Level::load_fail_file_not_found)
         return GWSTATUS_PLAYER_WON;
     else if (result == Level::load_fail_bad_format)
         return GWSTATUS_LEVEL_ERROR;
@@ -102,7 +101,6 @@ int StudentWorld::init()
 // called every tick (roughly 20 times per second) - ask each Actor to doSomething, delete any Actors that have died during tick, update statusText
 int StudentWorld::move()
 {
-    
     // ASK ALL ACTORS TO DO SOMETHING IF THEY ARE ALIVE
     
     // first Penelope should doSomething
@@ -120,7 +118,8 @@ int StudentWorld::move()
         // if Actor does smt that causes Penelope to die, method immediately returns GWSTATUS_PLAYER_DIED
         if(!(m_penelope->isAlive()))
         {
-            decLives();     // must decrement number lives after dies 
+            decLives();     // must decrement number lives after dies
+            increaseScore(-1000);
             return GWSTATUS_PLAYER_DIED;
         }
         
@@ -147,7 +146,6 @@ int StudentWorld::move()
         it++;
     }
     
-
 
     // DELETE ANY ACTORS THAT HAVE DIED DURING THIS TICK AND REMOVE THEM FROM COLLECTION OF ACTORS
     
@@ -192,6 +190,7 @@ int StudentWorld::move()
     
     return GWSTATUS_CONTINUE_GAME;
 }
+
 
 
 void StudentWorld::cleanUp()
@@ -283,37 +282,6 @@ bool StudentWorld::isBlocked(int x, int y, Actor* a)
     return false;
 }
 
-
-//// see if two objects overlap in map (input is bottom left corner of item)
-//bool StudentWorld::overlaps(int x, int y)
-//{
-//    // iterate thru all other actors and check if they overlap -> if they do then return true
-//
-//    int deltaX, deltaY;
-//    int dist = 10;      // given that if euclidian dist less than 10 then ovelrap
-//
-//    // initialize iterator
-//    list<Actor*>::iterator it;
-//    it = m_actors.begin();
-//
-//    while(it != m_actors.end())
-//    {
-//        // modify values below to get centre of the object
-//        // deltaX difference in x coordinates, deltaY difference in y coordinates
-//        deltaX = ((*it)->getX() + .5*SPRITE_WIDTH) - (x + .5*SPRITE_WIDTH);
-//        deltaY = ((*it)->getY() + .5*SPRITE_HEIGHT) - (y + .5*SPRITE_HEIGHT);
-//
-//        if ( deltaX*deltaX + deltaY*deltaY <= dist*dist )
-//        {
-//            return true;    // inersects
-//        }
-//
-//        it++;
-//    }
-//
-//    return false;       // there were no intersections
-//}
-
 bool StudentWorld::overlaps(int x1, int y1, int x2, int y2)
 {
     int deltaX, deltaY;
@@ -335,8 +303,9 @@ bool StudentWorld::exitOverlapsWithCitizen(int x, int y)
     
     while(it != m_actors.end())
     {
-        // check if current actor is a Citizen and if overlaps w/ Exit
-        if(overlaps(x,y,(*it)->getX(),(*it)->getY()) && dynamic_cast<Citizen *>(*it) != nullptr)
+        // check if current actor is a CITIZEN and if overlaps w/ Exit
+            // Note: only Citizens are infectable
+        if(overlaps(x,y,(*it)->getX(),(*it)->getY()) && (*it)->isInfectable())
         {
             (*it)->makeDead();
             return true;
@@ -357,7 +326,8 @@ bool StudentWorld::worldContainsCitizens()       // used to determine if Penelop
     while(it != m_actors.end())
     {
         // check if current actor is a Citizen, if it is return true (the world does contain citizens)
-        if(dynamic_cast<Citizen *>(*it) != nullptr)
+            // Note: only Citizens are infectable (except Penelope checked elsewhere
+        if((*it)->isInfectable())
             return true;
         it++;
     }
@@ -375,11 +345,6 @@ void StudentWorld::toggleTimeToAdvance()
 {
     m_timeToAdvance = !m_timeToAdvance;
 }
-
-//bool StudentWorld::overlapsWithPenelope(int x, int y)
-//{
-//    return overlaps(m_penelope->getX(), m_penelope->getY(), x, y);
-//}
 
 
 
@@ -443,7 +408,6 @@ void StudentWorld::flamethrower(int x, int y)
                 // if addFlame returns false could not add flame, STOP ADDING FLAMES
                 if(!addFlame(x-i*SPRITE_WIDTH,y,GraphObject::left))
                 {
-                    cerr<<"madeit"<<endl;
                     break;
                 }
             }
@@ -493,8 +457,8 @@ void StudentWorld::infectOverlappingItems(int x, int y)
     
     while(it != m_actors.end())
     {
-        // check if Actor is infectable (only citizens left)
-        if((*it)->isInfectable() && (*it)->isAlive() && overlaps(x,y,(*it)->getX(),(*it)->getY()))
+        // check if Actor is infectable (only citizens left) AND not already infected
+        if((*it)->isInfectable() && (*it)->isAlive() && overlaps(x,y,(*it)->getX(),(*it)->getY()) && !((*it)->getInfectionStatus()))
         {
             playSound(SOUND_CITIZEN_INFECTED);
             (*it)->setInfectionStatus(true);
@@ -518,9 +482,10 @@ bool StudentWorld::checkOverlapExplodable(int x, int y, Actor* a)
     
     while(it != m_actors.end())
     {
-        // check if Actor is flammable (OBJECTS THAT CAN TRIGGER LANDMINE ARE FLAMMABLE AND MOVE... or are flames)
+        // check if Actor is flammable&blocksMovemnt (means AGENTS, FLAMES but NOT LANDMINES)
             // MAKE SURE DOESN'T OVERLAP W/ ITSELF
-        if(( (*it)->isFlammable() || dynamic_cast<Flame *>(*it) ) && a != (*it) && overlaps(x,y,(*it)->getX(),(*it)->getY()))
+            // note: only Flames !flammable, !infectable, !blockMovement, !blockFlames
+        if(( ( (*it)->isFlammable() && (*it)->blocksMovement() ) || !( (*it)->isFlammable() || (*it)->isInfectable() || (*it)->blocksMovement() || (*it)->blocksFlame())  ) && a != (*it) && overlaps(x,y,(*it)->getX(),(*it)->getY()))
         {
             return true;
         }
@@ -548,7 +513,8 @@ int StudentWorld::distNearestZombie(int x, int y)
     while(it != m_actors.end())
     {
         // first check if is a Zombie
-        if(dynamic_cast<Zombie *>(*it) != nullptr)
+            // note: only Zombies are flammable, !infectable, blockMovement, !blockFlames
+        if((*it)->isFlammable() && !((*it)->isInfectable()) && (*it)->blocksMovement() && !((*it)->blocksFlame()))
         {
             deltaX = (*it)->getX() - x;
             deltaY = (*it)->getY() - y;
@@ -572,7 +538,8 @@ bool StudentWorld::containsZombies()
     while(it != m_actors.end())
     {
         // check if current actor is a Zombie, if it is return true (the world does contain citizens)
-        if(dynamic_cast<Zombie *>(*it) != nullptr)
+            // note: only Zombies are flammable, !infectable, blockMovement, !blockFlames
+        if((*it)->isFlammable() && !((*it)->isInfectable()) && (*it)->blocksMovement() && !((*it)->blocksFlame()))
             return true;
         it++;
     }
@@ -805,8 +772,6 @@ void StudentWorld::smartZombieLogic(int x,int y, SmartZombie* z)
 // param (x,y) potential coordinate of VaccineGoodie
 bool StudentWorld::overlapsWithAnything(int x, int y)
 {
-    cerr<<"made it here 3"<<endl;
-    
     // first check penelope since not included in m_actor
     if(overlaps(x,y,m_penelope->getX(),m_penelope->getY()))
         return true;
@@ -824,9 +789,6 @@ bool StudentWorld::overlapsWithAnything(int x, int y)
             return true;
         it++;
     }
-    
-    cerr<<"made it here 5"<<endl;
-
     
     // else didn't overlap w/ anything
     return false;
