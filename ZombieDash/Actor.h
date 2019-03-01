@@ -36,6 +36,10 @@ public:
     
     virtual void burnUp();
     
+    void setInfectionStatus(bool b);
+    bool getInfectionStatus() const;
+
+    
 private:
     StudentWorld* m_myWorld;
     bool m_isAlive;
@@ -44,6 +48,7 @@ private:
     bool m_infectable;
     bool m_blocksMovement;
     bool m_blocksFlame;
+    bool m_infectionStatus;
 };
 
 // Wall Class
@@ -110,6 +115,8 @@ public:
     Vomit(double startX, double startY, StudentWorld* world);
     virtual ~Vomit();
     virtual void doSomething();
+private:
+    int m_lifeTicks;
 };
 
 class Landmine : public ActivatingObject
@@ -120,6 +127,10 @@ public:
     virtual void doSomething();
     
     virtual void burnUp();
+    
+private:
+    void explode();
+    int m_safetyTicks;
 };
 
 class Goodie : public ActivatingObject
@@ -174,11 +185,16 @@ public:
     Agent(int imageID, double startX, double startY, bool infectable, StudentWorld* world);
     virtual ~Agent();
     
-    bool isBlocked(int destX, int destY);
+    bool isBlocked(int destX, int destY, Actor* a);
 //    bool overlaps(int x, int y);
     
     // since will never instantiate an Agent -> Abstract Base Class
     virtual void doSomething() = 0;
+    
+    void incParalysisTick();
+    bool isParalyzed();
+private:
+    int m_paralysisTick;
 };
 
 // Zombie Class
@@ -198,6 +214,7 @@ public:
 private:
     // since will never instantiate a Zombie -> Abstract Base Class
     virtual void specificZombieStuff() = 0;
+    virtual int specificZombieDie() = 0;
     int m_movePlanDist;        // movement plan distance
 };
 
@@ -209,6 +226,7 @@ public:
     virtual ~DumbZombie();
 private:
     virtual void specificZombieStuff();
+    virtual int specificZombieDie();
 };
 
 // Smart Zombie Class
@@ -219,6 +237,7 @@ public:
     virtual ~SmartZombie();
 private:
     virtual void specificZombieStuff();
+    virtual int specificZombieDie();
 };
 
 
@@ -230,15 +249,11 @@ public:
     virtual ~Human();
     //since will never instantiate a Human -> Abstract Base Class
     virtual void doSomething() = 0;
-    
-    bool getInfectionStatus() const;
-    void setInfectionStatus(bool b);
-    
+        
     int getInfectionCount() const;
-    void incInfectionCount();       // increment infectionCount by 1
+    void setInfectionCount(int i);       
     
 private:
-    bool m_infectionStatus;
     int m_infectionCount;
 };
 
