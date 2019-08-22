@@ -1,0 +1,431 @@
+Marcus Pearce
+
+=================================== CS32 PROJECT 3 REPORT ===================================
+
+
+
+========================= PART 1 =========================
+
+
+
+
+
+-------------------- ACTOR CLASS --------------------
+
+
+virtual void doSomething() = 0;     
+	// Each Actor in the StudentWorld must doSomething() every tick of the game. I chose to define a pure virtual function of doSomething() in my base Actor class because all subclasses of Actor need to doSomething(), and each Actor doSomething() in a different way. 
+
+StudentWorld* getWorld() const;
+	// accessor function for StudentWorld Actor is currently in. I chose to define getWorld() as non-virtual since it is the same for every Actor, and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_myWorld)
+
+bool isAlive() const;
+	// accessor function for if Actor is currently alive. I chose to define isAlive() as non-virtual since it is the same for every Actor, and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_isAlive) (e.g. in List<Actor*> m_actors)
+
+void makeDead();
+	// makes the Actor dead. I chose to define makeDead() as non-virtual since it is the same for every Actor, and defined it in the Actor class since almost every subclass of Actor needs this method 
+
+bool isFlammable() const;
+	// accessor function for if Actor is flammable. I chose to define isFlammable() as non-virtual since it is the same for every Actor (each Actor subclass will define this in its constructor), and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_isFlammable) (e.g. in List<Actor*> m_actors)
+
+bool isInfectable() const;
+	// accessor function for if Actor is infectable. I chose to define isInfectable() as non-virtual since it is the same for every Actor (each Actor subclass will define this in its constructor), and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_isInfectable) (e.g. in List<Actor*> m_actors)
+
+bool blocksMovement() const;
+	// accessor function for if Actor blocks movement. I chose to define blocksMovement() as non-virtual since it is the same for every Actor (each Actor subclass will define this in its constructor), and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_blocksMovement) (e.g. in List<Actor*> m_actors)
+
+bool blocksFlame() const;
+	// accessor function for if Actor blocks flame. I chose to define blocksflame() as non-virtual since it is the same for every Actor (each Actor subclass will define this in its constructor), and defined it in the Actor class since every subclass of Actor needs this method (and has to access priavte member variable m_blocksFlame) (e.g. in List<Actor*> m_actors)
+
+virtual void burnUp();
+	// Actor will do specified behaviour when comes into contact w/ fire (only called on FLAMMABLE objects). I chose to define burnUp() as virtual as some subclasses of Actor will do different things when they burnUp. I put it in the Actor class because it is called when iterating through m_actors.
+
+void setInfectionStatus(bool b);
+	// Mutator function for m_infectionStatus. I chose to define setInfectionStatus as non-virtual since it is the same for every Actor, and defined in the Actor class cuz called when iterating through m_actors.
+
+bool getInfectionStatus() const;
+	// Accessor function for m_infectionStatus. I chose to define getInfectionStatus as non-virtual since it is the same for every Actor, and defined in the Actor class cuz called when iterating through m_actors.
+
+
+-------------------- WALL CLASS --------------------
+
+
+virtual void doSomething();
+	// Wall must doSomething() every tick of the game (i.e. nothing). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Wall class' specific behaviour. 
+
+
+-------------------- ACTIVATING OBJECT CLASS --------------------
+
+
+virtual void doSomething() = 0;
+	// Each ActivatingObject in the StudentWorld must doSomething() every tick of the game. I chose to define a pure virtual function of doSomething() in my base ActivatingObject class because needs to define since subclass of Actor and all subclasses of ActivatingObject need to doSomething(), and each ActivatingObject doSomething() in a different way. 
+    
+bool isActive() const;
+	// accessor function for m_active. I chose to define isActive() as non-virtual since it is the same for every ActivatingObject, and defined in the ActivatingObject class cuz only ActivatingObjects need it.
+
+void setActive(bool b);
+	// mutator function for m_active. I chose to define setActive() as non-virtual since it is the same for every ActivatingObject, and defined in the ActivatingObject class cuz only ActivatingObjects need it.
+
+
+-------------------- EXIT CLASS --------------------
+
+
+virtual void doSomething();
+	// Exit must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Exit class' specific behaviour.
+
+
+-------------------- PIT CLASS --------------------
+
+
+virtual void doSomething();
+	// Pit must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Pit class' specific behaviour.
+
+
+-------------------- FLAME CLASS --------------------
+
+
+virtual void doSomething();
+	// Flame must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Flame class' specific behaviour.
+
+
+-------------------- VOMIT CLASS --------------------
+
+
+virtual void doSomething();
+	// Vomit must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Vomit class' specific behaviour.
+
+
+-------------------- LANDMINE CLASS --------------------
+
+
+virtual void doSomething();
+	// Landmine must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Landmine class' specific behaviour.
+
+virtual void burnUp();
+	// when overlaps w/ flame Landmine will explode (full details in spec). This is virtual because it is redefining the virtual func in superclass Actor, specifying what a Landmine specifically will do when overlaps w/ Flame
+
+
+-------------------- GOODIE CLASS --------------------
+
+
+virtual void doSomething();
+	// Goodie must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Goodie class' specific behaviour. Note: each subclass of Goodie will redefine Goodie's PRIVATE function specificGoodieStuff() which is called within Goodie's doSomething(), thus subclasses of Goodie don't redefine doSomething(). This function is factored out this way because the majority of what subclasses of Goodie do in doSomething() is very similar. 
+
+
+-------------------- AGENT CLASS --------------------
+
+
+virtual void doSomething() = 0;
+	// Each Agent in the StudentWorld must doSomething() every tick of the game. I chose to define a pure virtual function of doSomething() in my base Agent class because needs to define since subclass of Actor and all subclasses of Agent need to doSomething(), and each Agent doSomething() in a different way. 
+
+bool isBlocked(int destX, int destY, Actor* a);
+	// checks if Agent is blocked from moving to given position (using method in StudentWorld). I chose to define isBlocked() as non-virtual since it is the same for every Agent, and defined it in the Agent class since only moving Actors (i.e. Agents) will check if they are blocked from moving to a given position
+    
+void incParalysisTick();
+	// mutator function for m_paralysisTick. I chose to define incParalysisTick() as non-virtual since it is the same for every Agent, and defined in the Agent class cuz only some subclasses of Agent need it.
+
+bool isParalyzed();
+	// accessor function for if paralyzed (i.e. m_paralysisTick % 2 == 0). I chose to define isParalyzed() as non-virtual since it is the same for every Agent, and defined in the Agent class cuz only some subclasses of Agent need it.
+
+
+-------------------- ZOMBIE CLASS --------------------
+
+
+virtual void doSomething();
+	// Zombie must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Zombie class' specific behaviour. Note: each subclass of Zombie will redefine Zombie's PRIVATE function specificZombieStuff() which is called within Zombie's doSomething(), thus subclasses of Zombie don't redefine doSomething(). This function is factored out this way because the majority of what subclasses of Zombie do in doSomething() is very similar. 
+
+int getMovePlanDist() const;
+	// accessor function for m_movePlanDist. I chose to define getMovePlanDist() as non-virtual since it is the same for every Zombie, and defined in the Zombie class cuz only subclasses of Zombie need it.
+
+void setMovePlanDist(int i);
+	// mutator function for m_movePlanDist. I chose to define setMovePlanDist() as non-virtual since it is the same for every Zombie, and defined in the Zombie class cuz only subclasses of Zombie need it.
+
+virtual void burnUp();
+	// when overlaps w/ Zombie will execute certain behaviour (full details in spec). This is virtual because it is redefining the virtual func in superclass Actor, specifying what a Zombie specifically will do when overlaps w/ Flame. Note: each subclass of Zombie will redefine Zombie's PRIVATE function specificZombieDie() which is called within Zombie's burnUp(), thus subclasses of Zombie don't redefine burnUp(). This function is factored out this way because the majority of what subclasses of Zombie do in burnUp() is very similar.  
+
+
+-------------------- HUMAN CLASS --------------------
+
+
+virtual void doSomething() = 0;
+	// Each Human in the StudentWorld must doSomething() every tick of the game. I chose to define a pure virtual function of doSomething() in my base Human class because needs to define since subclass of Actor and all subclasses of Human need to doSomething(), and each Human doSomething() in a different way.
+
+int getInfectionCount() const;
+	// accessor function for m_infectionCount. I chose to define getInfectionCount() as non-virtual since it is the same for every Human, and defined in the Human class cuz only subclasses of Human need it.
+
+void setInfectionCount(int i); 
+	// mutator function for m_infectionCount. I chose to define setInfectionCount() as non-virtual since it is the same for every Human, and defined in the Human class cuz only subclasses of Human need it.
+
+
+-------------------- CITIZEN CLASS --------------------
+
+
+virtual void doSomething();
+	// Citizen must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Citizen class' specific behaviour.
+    
+virtual void burnUp();
+	// when overlaps w/ flame Citizen will do certain behaviour (full details in spec). This is virtual because it is redefining the virtual func in superclass Actor, specifying what a Citizen specifically will do when overlaps w/ Flame
+
+
+-------------------- PENELOPE CLASS --------------------
+
+
+virtual void doSomething();
+	// Penelope must doSomething() every tick of the game (defined in spec). This is virtual because it is redefining the pure virtual func in superclass Actor, specifying the Penelope class' specific behaviour.
+    
+int getNumVaccines() const;
+	// accessor function for m_numVac. I chose to define getNumVaccines() as non-virtual since only Penelope needs it
+
+int getNumFlames() const;
+	// accessor function for m_numFlames. I chose to define getNumFlames() as non-virtual since only Penelope needs it
+
+int getNumMines() const;
+	// accessor function for m_numMines. I chose to define getNumMines() as non-virtual since only Penelope needs it
+
+void incNumVaccines(int n);
+	// mutator function for m_numVac. I chose to define incNumVaccines() as non-virtual since only Penelope needs it
+
+void incNumFlames(int n);
+	// mutator function for m_nuFlames. I chose to define incNumFlames() as non-virtual since only Penelope needs it
+
+void incNumMines(int n);
+	// accessor function for m_numMines. I chose to define getNumMines() as non-virtual since only Penelope needs it
+
+virtual void burnUp();
+	// when overlaps w/ flame Penelope will do certain behaviour (full details in spec). This is virtual because it is redefining the virtual func in superclass Actor, specifying what Penelope specifically will do when overlaps w/ Flame
+
+
+-------------------- STUDENTWORLD CLASS --------------------
+
+
+virtual int init();
+	// follows behaviour detailed in spec. I made this class virtual because it redefines from superclass GameWorld
+
+virtual int move();
+	// follows behaviour detailed in spec. I made this class virtual because it redefines from superclass GameWorld
+
+virtual void cleanUp();
+	// follows behaviour detailed in spec. I made this class virtual because it redefines from superclass GameWorld
+
+
+
+// NOTE: FOR ALL BELOW FUNCTIONS non-virtual because only needed by StudentWorld (and no subclasses of StudentWorld)
+
+
+
+Penelope* getPenelope();
+	// Returns Penelope object in Studentworld
+
+void addActor(Actor* a);
+	// pushes a new Actor into member data structure list<Actor*> m_actors
+
+bool isBlocked(int x, int y, Actor* a);
+	// checks if Actor is blocked from moving to given coordinate (details in spec)
+
+bool overlaps(int x1, int y1, int x2, int y2);
+	// checks if two points are within Euclidian dist 10 of each other (and thus overlapping ... details in spec)
+
+
+// below for Exit logic
+bool exitOverlapsWithCitizen(int x, int y);
+	// check if any Citizen overlapping w/ Exit (given (x,y) of exit)
+
+bool penelopeCanExit(int x, int y);                
+	// check if Penelope overlapping w/ Exit (given (x,y) of exit) and no more citizens in world
+
+void toggleTimeToAdvance();
+	// used for logic if Penelope has completed the level (i.e. no more citizens)
+
+
+// below for Flame logic
+void burnOverlappingItems(int x, int y);
+	// call burnUp on any flammable objects overlapping w/ flame given (x,y) of flame
+
+bool addFlame(int x, int y, Direction dir);
+	// if possible add flame at (x,y) facing dir, return bool if was successful
+
+void flamethrower(int x, int y);
+	// logic for Penelope's flamethrower, at most 3 in direction Penelope is facing
+
+
+// below for Vomit logic
+void infectOverlappingItems(int x, int y);
+	// set infectStatus to true for any infectable objects intersecting w/ vomit
+
+
+// below for Landmine logic
+bool checkOverlapExplodable(int x, int y, Actor* a);
+	// check that if any valid (see spec) objects are intersecting w/ landmine, explode
+
+
+// below for Citizen logic
+int distNearestZombie(int x, int y);
+	// return the distance to the nearest Zombie Actor
+
+bool containsZombies();
+	// return if the world still contains Zombies
+
+
+// below for Zombie logic
+bool checkPersonInFrontOfZombie(int x, int y, Direction dir);
+	// step 3 for Zombie doSomething() (see spec) - compute vomit logic
+
+
+// below for SmartZombie logic
+void smartZombieLogic(int x, int y, SmartZombie* z);
+	// step 4 for SmartZombie (see spec), how determine new direction
+
+
+// below for dumbZombieLogic
+bool overlapsWithAnything(int x, int y);
+	// called by Zombie upon dying - needs to determine if vaccine threw will overlap w/ any Actor (if so return false). Param (x,y) are the potential coordinate of VaccineGoodie
+
+
+// below for Pit logic
+void pitExecuteLogic(int x, int y);
+	// logic for Pit killing (killable) Actors it overlaps with (called in Pit's doSomething()). See spec
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+========================= PART 2 =========================
+
+
+
+Bug: if Penelope is halfway between two wall objects and halfway away, is able to shoot flamethrower through the wall (i.e. flames will appear behind Wall object when shouldn't). Tested and this behaves the same as the sample game. Likely result of using Euclidian distance to determine overlap.
+
+
+
+========================= PART 3 =========================
+
+
+
+What to do for bug above - decided to do same as sample game and allow bug to happen (does not negatively affect gameplay).
+
+
+
+========================= PART 4 =========================
+
+
+
+// NOTE: only talk about testing non-abstract base classes (since cannot instantiate an abstract base class, its behaviour was tested through its subclasses)
+
+// During testing, set Penelope to start each level w/ 100 of each goodie to check respective behaviours (e.g. Penelope firing flamethrower at Landmine). Also made new command "n" to skip to the next level immediately. Also added a Citizen, DumbZombie, SmartZombie to first level file to test behaviours (e.g. Zombie infecting Citizen).
+
+// for all descriptions below, tested through gameplay
+
+
+-------------------- WALL CLASS --------------------
+
+
+To test the Wall class, first made sure appeared in StudentWorld w/ correct image and orientaiton. To test that Wall blocks movement, tried walking through wall w/ Penelope (didn't' work) and checked that other Agents could not walk into walls either. To test that Wall blocks flames, tried setting off landmines next to walls (no flames on walls) and shooting flamethrower into wall (generally stops, but see bug in part 2).
+
+
+-------------------- EXIT CLASS --------------------
+
+
+To test the Exit class, first made sure appeared in StudentWorld w/ correct image and orientation. First tested that in level w/o Citizens that Penelope would leave when overlap w/ Exit. Checked Zombies, Landmines (anything but Human) cannot exit. In world w/ Citizens, check that Citizens can exit when overlap w/ Exit. Penelope cannot exit until all citizens in level have either died or exited (checked this in a variety of ways - killing citizens w/ fire, letting them turn into zombies, saving all citizens). All cases worked. Tested that Exits block flames using Landmines and Flamethrower.
+
+
+-------------------- PIT CLASS --------------------
+
+
+To test the Pit class, first made sure appeared in StudentWorld w/ correct image and orientation. Tested that doesn't block flames and doesn't block movement of actors (observed Zombies, Citizens walk into Pit, walked into Pit as Penelope, shot flamethrower through Pit). Tested that Agent Actors die when overlap w/ Pit through same method.
+
+
+-------------------- FLAME CLASS --------------------
+
+
+Tested flame class through Penelope's flamethrower and landmine. Made sure only lasts 2 ticks through observation. Made sure didn't block movement (observed Agents walking into them). Tested that flames would destroy Goodies if overlapped with them. Tested that flamethrower would stop when overlapped w/ !flammable object (e.g. Walls, Exits). Tested flames would kill any Agent it overlapped with. Tested that flame would detonate Landmine. 
+
+
+-------------------- VOMIT CLASS --------------------
+
+
+Tested vomit class through Zombies. Made sure only lasts 2 ticks through observation. Made sure didn't block movement (observed Agents walking into them). Tested that vomit would infect Humans if overlapped with them (through letting zombies come close and vomiting on Citizens and Penelope). Tested to make sure vomit would not appear on Walls but ok on Exits. 
+
+
+-------------------- LANDMINE CLASS --------------------
+
+
+To test the Landmine class, first made sure appeared in StudentWorld w/ correct image and orientation. Made sure had 30 safety ticks (stood on landmine and took 30 ticks before exploded). Made sure when Landmine exploded did correct thing (introduce flames in 8 adjacent spots as well as same (x,y) as Landmine (if flame can be introduced at those coordinates), introduce Pit at same (x,y) as Landmine) by observation. Made sure Landmines could be triggered by flames (e.g. Penelope's flamethrower) or an Agent overlapping with them (tested w/ Penelope, Citizen, Zombies). Made sure two Overlapping Landmines would not trigger each other. Made sure played correct noise when exploded. 
+
+
+-------------------- GOODIE CLASS --------------------
+ 
+
+// NOTE: lumped all Goodie subclasses into here since only difference is how they change inventory, of which all 3 did correctly (i.e. GasCanGoodie +5 flame charges, VaccineGoodie +1 vaccine, LandmineGoodie +2 landmines)
+
+To test the Goodie subclasses, first made sure each appeared in StudentWorld w/ correct image and orientation. Made sure all goodies would disappear if overlap w/ a flame (shot flamethrower at them). Made sure each goodie would disappear once overlap w/ Penelope and would increment inventory correctly (see above - tested through gamePlay). 
+
+
+-------------------- DUMBZOMBIE CLASS --------------------
+
+
+To test the DumbZombie class, first made sure appeared in StudentWorld w/ correct image and orientation. Tested movement through observation - watched as it adhered to the spec (randomish and aimless). To test dropping vaccineGoodie behaviour upon death temporarily set probability of drop to be 100%, and saw that DumbZombie would correctly throw the vaccineGoodie in a random direction around wehre it died. When reimplemented the probability upon playing found that around 1 in 10 zombies would drop a vaccine. Made sure zombies would vomit if close to and facing a Human (and only humans) through gameplay. Made sure played correct sound when died and incremented score by 1000. Made sure blocks movement of other Agents. Made sure could not pick up goodies. Made sure could not exit. Made sure could not walk through walls. Made sure died when should (e.g. touch flame, walk thru pit) and incremented score accordingly.
+
+
+-------------------- SMARTZOMBIE CLASS --------------------
+
+
+To test the SmartZombie class, first made sure appeared in StudentWorld w/ correct image and orientation. Tested movement through observation - watched as it adhered to the spec (if close to a Human would make its way towards that Human). Made sure zombies would vomit if close to and facing a Human (and only humans) through gameplay. Made sure played correct sound when died and incremented score by 2000. Made sure blocks movement of other Agents. Made sure could not pick up goodies. Made sure could not exit. Made sure could not walk through walls. Made sure died when should (e.g. touch flame, walk thru pit) and incremented score accordingly.
+
+
+-------------------- CITIZEN CLASS --------------------
+
+
+To test the Citizen class, first made sure appeared in StudentWorld w/ correct image and orientation. Tested movement through observation - watched as it adhered to the spec (if close to Penelope would approach, if close to Zombie would try to run away, etc.). Made sure Citizens could exit the map and incremented score accordingly. Made sure citizens would eventually become zombies (500 ticks later) if got vomited on and decramented score accordingly. Made sure blocks movement of other Agents. Made sure could not pick up goodies. Made sure could not walk through walls. Made sure died when should (e.g. touch flame, walk thru pit) and decramented score accordingly.
+
+
+-------------------- PENELOPE CLASS --------------------
+
+
+To test the Penelope class, first made sure appeared in StudentWorld w/ correct image and orientation. Made sure each keypress did the correct thing (e.g. move, use specific goodie). Made sure couldn't exit until all citizens gone from world. Made sure would behave as if was included in m_actors data structure even though had seperate pointer. Made sure incremented score correctly when should (e.g. when exit, kills zombie, pickup goodie). Made sure could not walk through walls. Made sure died when should (e.g. touch flame, walk thru pit). Made sure could pickup goodies and increment score and inventory correctly. Made sure moved at correct speed. 
+
+
+-------------------- STUDENTWORLD CLASS --------------------
+
+
+To test the StudentWorld just played the game - most methods were called and thus tested through the subclasses of Actor. Checked game logic functions (init, move, cleanUp) all worked by seeing the game get displayed, keeping the statString at the top updated correctly, calling doSomething() for each Actor every tick, etc. Displays correct files (level files increasing in order, interim files (completed level, died, gameOver, gameWon) correctly. Game is actually pretty fun :)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
