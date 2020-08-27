@@ -1,6 +1,6 @@
 # ZombieDash
 
-*** Score: 100/100
+### Score: 100/100
 
 This project implements an interactive, map-based game in which the user leads "civilians" to safety from "zombies." The user can heal itself and kill zombies using power-ups which are picked up throughout the map. This project is implemented with **C++** and uses XQuartz for graphics. 
 
