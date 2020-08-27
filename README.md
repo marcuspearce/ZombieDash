@@ -8,4 +8,4 @@ I was tasked with coming up with a logical class hierarchy as well as associated
 
 More details on the implementation, as well as testing procedures, are documented in report.txt. 
 
-This was my year's legendary Project 3 for UCLA's CS 32 -- Introduction to Computer Science II (Data Structures).
+This was my year's legendary Project 3 for UCLA's CS 32 -- Introduction to Computer Science II (Data Structures). Taken Winter 2019. 
